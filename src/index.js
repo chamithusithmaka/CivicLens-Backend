@@ -3,11 +3,19 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+//import routes
+const roleRoutes = require("./routes/roleRoutes");
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Routes
+
+app.use("/api/roles", roleRoutes);
+
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

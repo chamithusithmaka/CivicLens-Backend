@@ -5,6 +5,8 @@ const cors = require('cors');
 
 //import routes
 const roleRoutes = require("./routes/roleRoutes");
+const partyRoutes = require("./routes/partyRoutes");
+
 const app = express();
 
 // Middleware
@@ -14,6 +16,8 @@ app.use(express.json());
 // Routes
 
 app.use("/api/roles", roleRoutes);
+app.use("/api/parties", partyRoutes);
+
 
 
 

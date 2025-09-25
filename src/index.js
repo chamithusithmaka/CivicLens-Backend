@@ -6,6 +6,7 @@ const cors = require('cors');
 //import routes
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
+const politicianRoutes = require("./routes/politicianRoutes");
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(express.json());
 
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
+app.use("/api/politicians", politicianRoutes);
+
 
 
 

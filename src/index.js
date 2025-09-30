@@ -7,6 +7,7 @@ const cors = require('cors');
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
+const levelRoutes = require("./routes/levelRoutes");
 
 const app = express();
 
@@ -19,9 +20,7 @@ app.use(express.json());
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
-
-
-
+app.use("/api/levels", levelRoutes);
 
 
 // MongoDB connection

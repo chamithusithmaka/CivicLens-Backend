@@ -1,12 +1,16 @@
-require('dotenv').config();
-const express = require('express');
+require('dotenv').config({ path: __dirname + '/.env' });
+
+
+// ...existing code...const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const express = require('express');
 
 //import routes
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
+const questionRoutes = require('./routes/questionRoutes');
 
 const app = express();
 
@@ -19,8 +23,7 @@ app.use(express.json());
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
-
-
+app.use('/api/questions', questionRoutes);
 
 
 

@@ -11,6 +11,10 @@ const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
 const questionRoutes = require('./routes/questionRoutes');
+const commonRoutes = require('./routes/common');
+const performanceRoutes = require('./routes/performanceRoutes');
+const polibotRoutes = require('./routes/polibot');
+const polibotAiRoutes = require('./routes/polibot-ai');
 
 const app = express();
 
@@ -24,7 +28,10 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
 app.use('/api/questions', questionRoutes);
-
+app.use('/api/common', commonRoutes);
+app.use('/api/performance', performanceRoutes);
+app.use('/api/polibot', polibotRoutes);
+app.use('/api/polibot-ai', polibotAiRoutes);
 
 
 // MongoDB connection

@@ -1,12 +1,11 @@
 require('dotenv').config({ path: __dirname + '/.env' });
 
 
-// ...existing code...const express = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const express = require('express');
 
-//import routes
+// Import routes
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
@@ -15,6 +14,8 @@ const commonRoutes = require('./routes/common');
 const performanceRoutes = require('./routes/performanceRoutes');
 const polibotRoutes = require('./routes/polibot');
 const polibotAiRoutes = require('./routes/polibot-ai');
+const geminiQuizRoutes = require('./routes/geminiQuizRoutes');
+const quizHistoryRoutes = require('./routes/quizHistoryRoutes');
 
 const app = express();
 
@@ -23,7 +24,6 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
@@ -32,6 +32,8 @@ app.use('/api/common', commonRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/polibot', polibotRoutes);
 app.use('/api/polibot-ai', polibotAiRoutes);
+app.use('/api/quiz', geminiQuizRoutes);
+app.use('/api/quiz/history', quizHistoryRoutes);
 
 
 // MongoDB connection

@@ -9,6 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const promiseRoutes = require('./routes/promiseRoutes');
+app.use('/promise/api', promiseRoutes);
+
+const ministryGrowthNewsRoutes = require('./routes/ministryGrowthNewsRoutes');
+app.use('/promise/api', ministryGrowthNewsRoutes);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))

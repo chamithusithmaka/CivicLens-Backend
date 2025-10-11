@@ -1,5 +1,4 @@
-const MinistryGrowthNews = require('../models/MinistryGrowthNews');
-
+const MinistryGrowthNews = require('../models/ministryGrowthNews');
 
 
 // Get all news

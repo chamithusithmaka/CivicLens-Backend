@@ -116,8 +116,41 @@ const getQuizHistoryDetail = async (req, res) => {
   }
 };
 
+/**
+ * Delete a specific quiz history record
+ * DELETE /api/quiz/history/:quizId
+ */
+const deleteQuizHistory = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    console.log('[BACKEND] Received DELETE request for quizId:', quizId);
+
+    const result = await QuizHistory.findByIdAndDelete(quizId);
+    console.log('[BACKEND] Delete result:', result);
+
+    if (!result) {
+      console.log('[BACKEND] Quiz history not found for quizId:', quizId);
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz history not found'
+      });
+    }
+
+    console.log('[BACKEND] Quiz history deleted successfully for quizId:', quizId);
+    res.status(200).json({
+      success: true,
+      message: 'Quiz history deleted successfully'
+    });
+
+  } catch (err) {
+    console.error('[BACKEND] Error deleting quiz history:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   saveQuizHistory,
   getUserQuizHistory,
-  getQuizHistoryDetail
+  getQuizHistoryDetail,
+  deleteQuizHistory
 };

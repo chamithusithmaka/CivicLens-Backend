@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 // Import routes
+const adminRoutes = require('./routes/adminRoutes');
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
@@ -16,6 +17,7 @@ const polibotRoutes = require('./routes/polibot');
 const polibotAiRoutes = require('./routes/polibot-ai');
 const geminiQuizRoutes = require('./routes/geminiQuizRoutes');
 const quizHistoryRoutes = require('./routes/quizHistoryRoutes');
+const supportRoutes = require('./routes/supportRoutes'); // Add this line
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/admin', adminRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
@@ -34,6 +37,7 @@ app.use('/api/polibot', polibotRoutes);
 app.use('/api/polibot-ai', polibotAiRoutes);
 app.use('/api/quiz', geminiQuizRoutes);
 app.use('/api/quiz/history', quizHistoryRoutes);
+app.use('/api/support', supportRoutes); // Add this line
 
 
 // MongoDB connection

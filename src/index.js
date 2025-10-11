@@ -21,6 +21,9 @@ app.use('/promise/api', ministryPerformanceRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/promise/api', userRoutes);
 
+const userFeedbackRoutes = require('./routes/userFeedbackRoutes');
+app.use('/promise/api', userFeedbackRoutes);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))

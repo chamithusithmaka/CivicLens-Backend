@@ -39,6 +39,20 @@ app.use('/api/quiz', geminiQuizRoutes);
 app.use('/api/quiz/history', quizHistoryRoutes);
 app.use('/api/support', supportRoutes); // Add this line
 
+const promiseRoutes = require('./routes/promiseRoutes');
+app.use('/promise/api', promiseRoutes);
+
+const ministryGrowthNewsRoutes = require('./routes/ministryGrowthNewsRoutes');
+app.use('/promise/api', ministryGrowthNewsRoutes);
+
+const ministryPerformanceRoutes = require('./routes/ministryPerformanceRoutes');
+app.use('/promise/api', ministryPerformanceRoutes);
+
+const userRoutes = require('./routes/userRoutes');
+app.use('/promise/api', userRoutes);
+
+const userFeedbackRoutes = require('./routes/userFeedbackRoutes');
+app.use('/promise/api', userFeedbackRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

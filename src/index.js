@@ -1,6 +1,4 @@
 require('dotenv').config({ path: __dirname + '/.env' });
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +8,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const roleRoutes = require("./routes/roleRoutes");
 const partyRoutes = require("./routes/partyRoutes");
 const politicianRoutes = require("./routes/politicianRoutes");
+const levelRoutes = require("./routes/levelRoutes");
 const questionRoutes = require('./routes/questionRoutes');
 const commonRoutes = require('./routes/common');
 const performanceRoutes = require('./routes/performanceRoutes');
@@ -18,18 +17,25 @@ const polibotAiRoutes = require('./routes/polibot-ai');
 const geminiQuizRoutes = require('./routes/geminiQuizRoutes');
 const quizHistoryRoutes = require('./routes/quizHistoryRoutes');
 const supportRoutes = require('./routes/supportRoutes'); // Add this line
+const userRoutes = require('./routes/userRoutes');
+const newsRoutes = require('./routes/newsRoutes');
+const electionRoutes = require('./routes/electionRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.use('/api/admin', adminRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/parties", partyRoutes);
 app.use("/api/politicians", politicianRoutes);
+app.use("/api/levels", levelRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/common', commonRoutes);
 app.use('/api/performance', performanceRoutes);
@@ -48,8 +54,13 @@ app.use('/promise/api', ministryGrowthNewsRoutes);
 const ministryPerformanceRoutes = require('./routes/ministryPerformanceRoutes');
 app.use('/promise/api', ministryPerformanceRoutes);
 
-const userRoutes = require('./routes/userRoutes');
-app.use('/promise/api', userRoutes);
+
+
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/elections', electionRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 const userFeedbackRoutes = require('./routes/userFeedbackRoutes');
 app.use('/promise/api', userFeedbackRoutes);

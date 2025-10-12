@@ -1,5 +1,5 @@
 const Politician = require('../models/Politician');
-const PromiseModel = require('../models/Promise'); // <-- change this line
+const PromiseModel = require('../models/Promise');
 const Party = require('../models/Party');
 const Role = require('../models/Role');
 
@@ -7,44 +7,56 @@ const Role = require('../models/Role');
 exports.getPoliticianDashboard = async (req, res) => {
   try {
     const { politicianId } = req.params;
-    
+    console.log('[DASHBOARD] Received politicianId:', politicianId);
+
     // Get politician details with populated references
     const politician = await Politician.findById(politicianId)
       .populate('party')
       .populate('currentRole')
       .populate('roles');
-    
+
     if (!politician) {
+      console.log('[DASHBOARD] Politician not found for id:', politicianId);
       return res.status(404).json({ error: 'Politician not found' });
     }
-    
+
     // Get all promises for this politician
     const promises = await PromiseModel.find({ politicianID: politicianId });
-    
+    console.log('[DASHBOARD] Found promises:', promises.length);
+
     // Calculate performance metrics
     const totalPromises = promises.length;
     const fulfilledPromises = promises.filter(p => p.promiseStatus === 'complete').length;
     const brokenPromises = promises.filter(p => p.promiseStatus === 'broken').length;
     const pendingPromises = promises.filter(p => p.promiseStatus === 'pending').length;
-    
+
     // Calculate average performance score
-    const avgPerformanceScore = promises.length > 0 
-      ? promises.reduce((sum, p) => sum + p.performanceScore, 0) / promises.length 
+    const avgPerformanceScore = promises.length > 0
+      ? promises.reduce((sum, p) => sum + (p.performanceScore || 0), 0) / promises.length
       : 0;
-    
+
     // Calculate average public approval rating
     const avgPublicApproval = promises.length > 0
-      ? promises.reduce((sum, p) => sum + p.publicApprovalRating, 0) / promises.length
+      ? promises.reduce((sum, p) => sum + (p.publicApprovalRating || 0), 0) / promises.length
       : 0;
-    
-    // Get quarterly performance data
+
+    // Get quarterly performance data (no hardcoded fallback)
     const quarterlyData = await getQuarterlyPerformance(politicianId);
-    
+    console.log('[DASHBOARD] Quarterly Data:', quarterlyData);
+
+    // Get approval trend data (no hardcoded fallback)
+    const approvalData = await getApprovalTrend(politicianId);
+    console.log('[DASHBOARD] Approval Data:', approvalData);
+
+    // Get category performance data (no hardcoded fallback)
+    const categoryData = await getPerformanceByCategory(politicianId);
+    console.log('[DASHBOARD] Category Data:', categoryData);
+
     // Get key promises (top 3 by performance score)
     const keyPromises = await PromiseModel.find({ politicianID: politicianId })
       .sort({ performanceScore: -1 })
       .limit(3);
-    
+
     // Format key promises for dashboard
     const formattedKeyPromises = keyPromises.map(promise => ({
       id: promise._id,
@@ -54,7 +66,7 @@ exports.getPoliticianDashboard = async (req, res) => {
       fulfillment: promise.promiseFulfillment,
       category: promise.promiseCategory
     }));
-    
+
     // Return formatted dashboard data
     res.json({
       politician: {
@@ -77,7 +89,8 @@ exports.getPoliticianDashboard = async (req, res) => {
       },
       trends: {
         quarterly: quarterlyData,
-        // Add other trend data as needed
+        approval: approvalData,
+        categories: categoryData
       },
       keyPromises: formattedKeyPromises,
       recentActivities: await getRecentActivities(politicianId)
@@ -130,43 +143,53 @@ exports.getAllPoliticianPerformance = async (req, res) => {
 
 // Get quarterly performance data
 async function getQuarterlyPerformance(politicianId) {
-  // Get all promises for this politician
   const promises = await PromiseModel.find({ politicianID: politicianId });
-  
-  // This is a simplified calculation - in a real app you'd store historical data
-  // or calculate based on actual timestamps of promises or events
-  
-  // Here we'll create mock data to match your dashboard format
-  return [
-    { quarter: 'Q1', rating: 50 },
-    { quarter: 'Q2', rating: 65 },
-    { quarter: 'Q3', rating: 90 },
-    { quarter: 'Q4', rating: 120 },
-    { quarter: 'Now', rating: 100 }
-  ];
+  // Calculate performance by quarter
+  const quarters = ['Q1', 'Q2', 'Q3', 'Q4', 'Now'];
+  const quarterlyData = quarters.map(quarter => {
+    const quarterPromises = promises.filter(promise => {
+      if (quarter === 'Now') return true;
+      const date = new Date(promise.startDate);
+      const promiseQuarter = Math.floor((date.getMonth()) / 3) + 1;
+      return `Q${promiseQuarter}` === quarter;
+    });
+    const rating = quarterPromises.length > 0
+      ? Math.round(quarterPromises.reduce((sum, p) => sum + (p.performanceScore || 0), 0) / quarterPromises.length)
+      : 0;
+    return { quarter, rating };
+  });
+  return quarterlyData;
 }
 
-// Get recent activities
+// Get approval trend data
+async function getApprovalTrend(politicianId) {
+  const promises = await PromiseModel.find({ politicianID: politicianId });
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  return months.map((month, index) => {
+    const monthPromises = promises.filter((_, i) => i % months.length === index);
+    const rating = monthPromises.length > 0
+      ? Math.round(monthPromises.reduce((sum, p) => sum + (p.publicApprovalRating || 0), 0) / monthPromises.length)
+      : 0;
+    return { month, rating };
+  });
+}
+
+// Get performance by category
+async function getPerformanceByCategory(politicianId) {
+  const promises = await PromiseModel.find({ politicianID: politicianId });
+  const categories = [...new Set(promises.map(p => p.promiseCategory))];
+  return categories.map(category => {
+    const categoryPromises = promises.filter(p => p.promiseCategory === category);
+    const score = categoryPromises.length > 0
+      ? Math.round(categoryPromises.reduce((sum, p) => sum + (p.performanceScore || 0), 0) / categoryPromises.length)
+      : 0;
+    return { category, score };
+  });
+}
+
+// Dummy for recent activities (keep as is or implement as needed)
 async function getRecentActivities(politicianId) {
-  // In a real app, you would fetch actual activities from a separate model
-  // For now, returning mock data to match your dashboard
-  return [
-    {
-      title: 'Budget Speech 2025',
-      description: 'Presented the annual budget focusing on economic recovery.',
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
-    },
-    {
-      title: 'Education Bill Passed',
-      description: 'Approved new funding for university research.',
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 1 week ago
-    },
-    {
-      title: 'Health Campaign Launched',
-      description: 'Started a national vaccination drive.',
-      date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000) // 3 weeks ago
-    }
-  ];
+  return [];
 }
 
 // Get performance by ministry

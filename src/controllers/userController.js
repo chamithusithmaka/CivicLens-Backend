@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Create a new user (Sign Up)
 exports.createUser = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, nic, password } = req.body;
+    const { name, fullName, email, phoneNumber, nic, password, district, profilePicture, fcmToken } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }, { nic }] });
@@ -17,15 +17,26 @@ exports.createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
-      fullName,
+      name: name || fullName, // Accept either name or fullName
       email,
       phoneNumber,
       nic,
-      password: hashedPassword
+      password: hashedPassword,
+      district,
+      profileImage: profilePicture, // Map profilePicture to profileImage
+      fcmToken // Save FCM token if provided
     });
 
     await user.save();
-    res.status(201).json({ message: 'User created successfully', user: { fullName, email, phoneNumber, nic } });
+    res.status(201).json({ 
+      message: 'User created successfully', 
+      user: { 
+        name: user.name, 
+        email, 
+        phoneNumber, 
+        nic 
+      } 
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -58,7 +69,7 @@ exports.loginUser = async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      user: { fullName: user.fullName, email: user.email, phoneNumber: user.phoneNumber, nic: user.nic }
+      user: { name: user.name, email: user.email, phoneNumber: user.phoneNumber, nic: user.nic }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -113,5 +124,33 @@ exports.deleteUser = async (req, res) => {
     res.json({ message: 'User deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Also add a specific endpoint for updating FCM token
+exports.updateFcmToken = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { fcmToken } = req.body;
+    
+    if (!fcmToken) {
+      return res.status(400).json({ error: 'FCM token is required' });
+    }
+    
+    const user = await User.findByIdAndUpdate(userId, 
+      { fcmToken }, 
+      { new: true }
+    ).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'FCM token updated successfully' 
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };

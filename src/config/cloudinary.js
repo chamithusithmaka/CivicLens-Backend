@@ -13,9 +13,9 @@ if (!fs.existsSync(uploadDir)) {
 // Configure cloudinary if environment variables are available
 try {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dpte7rafe',
+    api_key: process.env.CLOUDINARY_API_KEY || '441345834382446',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'wYtPragiNwqD6qVYN1Hh89pC1kg'
   });
   console.log('Cloudinary configured successfully');
 } catch (err) {
@@ -35,7 +35,7 @@ const diskStorage = multer.diskStorage({
 // Create cloudinary storage if properly configured
 let storage;
 try {
-  if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  if (process.env.CLOUDINARY_CLOUD_NAME || 'dpte7rafe' && process.env.CLOUDINARY_API_KEY || '441345834382446' && process.env.CLOUDINARY_API_SECRET || 'wYtPragiNwqD6qVYN1Hh89pC1kg') {
     storage = new CloudinaryStorage({
       cloudinary: cloudinary,
       params: {

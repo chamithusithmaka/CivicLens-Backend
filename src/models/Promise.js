@@ -1,5 +1,15 @@
 const mongoose = require('mongoose');
 
+const ReactionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  reactionType: { 
+    type: String, 
+    enum: ['like', 'heart', 'angry', 'funny'],
+    required: true 
+  },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const PromiseSchema = new mongoose.Schema({
     promiseID: { type: String, unique: true },
   politicianID: { type: String },
@@ -24,7 +34,28 @@ const PromiseSchema = new mongoose.Schema({
   timeliness: { type: String },
   budgetAllocation: { type: Number, default: 0 },
   startDate: { type: Date },
-  dueDate: { type: Date }
+  dueDate: { type: Date },
+
+  // NEW: reactions recorded directly on promise (optional per-user reactions)
+  reactions: [ReactionSchema]
 }, { timestamps: true });
+
+// Virtual to get aggregated reaction counts for the promise
+PromiseSchema.virtual('reactionCounts').get(function() {
+  const counts = { like: 0, heart: 0, angry: 0, funny: 0, total: 0 };
+  const reactions = this.reactions || [];
+  reactions.forEach(reaction => {
+    const type = reaction.reactionType;
+    if (type && Object.prototype.hasOwnProperty.call(counts, type)) {
+      counts[type]++;
+      counts.total++;
+    }
+  });
+  return counts;
+});
+
+// Ensure virtual fields are serialized
+PromiseSchema.set('toJSON', { virtuals: true });
+PromiseSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Promise', PromiseSchema);

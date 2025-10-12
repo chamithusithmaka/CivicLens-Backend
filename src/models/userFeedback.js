@@ -13,7 +13,7 @@ const ReactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   reactionType: { 
     type: String, 
-    enum: ['like', 'heart', 'angry', 'funny'], 
+    enum: ['like', 'heart', 'angry', 'funny'],
     required: true 
   },
   createdAt: { type: Date, default: Date.now }

@@ -225,3 +225,65 @@ exports.uploadImage = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get count of politicians by level
+exports.getPoliticiansCountByLevel = async (req, res) => {
+  try {
+    const levelId = req.params.levelId;
+    
+    if (!levelId) {
+      return res.status(400).json({ error: "Level ID is required" });
+    }
+    
+    const count = await politicianService.getPoliticiansCountByLevel(levelId);
+    res.json({ 
+      levelId: levelId,
+      count: count 
+    });
+  } catch (err) {
+    console.error("Error getting politicians count by level:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get roles of a politician by their ID
+exports.getPoliticianRoles = async (req, res) => {
+  try {
+    const politicianId = req.params.id;
+    
+    if (!politicianId) {
+      return res.status(400).json({ error: "Politician ID is required" });
+    }
+    
+    const rolesData = await politicianService.getPoliticianRoles(politicianId);
+    res.json(rolesData);
+  } catch (err) {
+    console.error("Error getting politician roles:", err);
+    if (err.message === "Politician not found") {
+      res.status(404).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+};
+
+// Get party information of a politician by their ID
+exports.getPoliticianParty = async (req, res) => {
+  try {
+    const politicianId = req.params.id;
+    
+    if (!politicianId) {
+      return res.status(400).json({ error: "Politician ID is required" });
+    }
+    
+    const partyData = await politicianService.getPoliticianParty(politicianId);
+    res.json(partyData);
+  } catch (err) {
+    console.error("Error getting politician party:", err);
+    if (err.message === "Politician not found") {
+      res.status(404).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+};

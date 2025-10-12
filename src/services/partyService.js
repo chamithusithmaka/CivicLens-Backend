@@ -22,6 +22,10 @@ class PartyService {
   async deleteParty(id) {
     return await Party.findByIdAndDelete(id);
   }
+
+  async getPartiesByFounder(founder) {
+    return await Party.find({ founder: new RegExp(founder, 'i') }); // Case-insensitive search
+  }
 }
 
 module.exports = new PartyService();

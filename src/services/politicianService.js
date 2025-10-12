@@ -1,4 +1,5 @@
 const Politician = require("../models/Politician");
+const Role = require("../models/Role");
 
 class PoliticianService {
   async createPolitician(data) {
@@ -10,16 +11,47 @@ class PoliticianService {
     return await Politician.find()
       .populate("party")
       .populate("currentRole")
-      .populate("roles")
-      .populate("electionRecords");
+      .populate("roles");
+      //.populate("electionRecords"); // Commented out until ElectionRecord model is created
+  }
+  
+  async getPoliticiansByLevel(levelId) {
+    // Find roles with the specified level
+    const roles = await Role.find({ level: levelId });
+    
+    // Get role IDs
+    const roleIds = roles.map(role => role._id);
+    
+    // Find politicians who either have the specified level as their current role
+    // or have it in their roles array
+    return await Politician.find({
+      $or: [
+        { currentRole: { $in: roleIds } },
+        { roles: { $in: roleIds } }
+      ]
+    })
+    .populate("party")
+    .populate({
+      path: "currentRole",
+      populate: {
+        path: "level"
+      }
+    })
+    .populate({
+      path: "roles",
+      populate: {
+        path: "level"
+      }
+    })
+    //.populate("electionRecords");
   }
 
   async getPoliticianById(id) {
     return await Politician.findById(id)
       .populate("party")
       .populate("currentRole")
-      .populate("roles")
-      .populate("electionRecords");
+      .populate("roles");
+      //.populate("electionRecords"); // Commented out until ElectionRecord model is created
   }
 
   async updatePolitician(id, data) {

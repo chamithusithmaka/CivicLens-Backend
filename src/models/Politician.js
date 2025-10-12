@@ -15,7 +15,7 @@ const PoliticianSchema = new mongoose.Schema({
   roles: [{ type: mongoose.Schema.Types.ObjectId, ref: "Role" }],
   achievements: [{ type: String }],
 
-  electionRecords: [{ type: mongoose.Schema.Types.ObjectId, ref: "ElectionRecord" }]
+  // electionRecords: [{ type: mongoose.Schema.Types.ObjectId, ref: "ElectionRecord" }] // Commented out until ElectionRecord model is created
 }, { timestamps: true });
 
 module.exports = mongoose.model("Politician", PoliticianSchema);

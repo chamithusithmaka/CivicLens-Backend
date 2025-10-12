@@ -9,17 +9,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const promiseRoutes = require('./routes/promiseRoutes');
-app.use('/promise/api', promiseRoutes);
-
-const ministryGrowthNewsRoutes = require('./routes/ministryGrowthNewsRoutes');
-app.use('/promise/api', ministryGrowthNewsRoutes);
-
-const ministryPerformanceRoutes = require('./routes/ministryPerformanceRoutes');
-app.use('/promise/api', ministryPerformanceRoutes);
-
+// Import routes
 const userRoutes = require('./routes/userRoutes');
-app.use('/promise/api', userRoutes);
+const promiseRoutes = require('./routes/promiseRoutes');
+const ministryPerformanceRoutes = require('./routes/ministryPerformanceRoutes');
+const ministryGrowthNewsRoutes = require('./routes/ministryGrowthNewsRoutes');
+const newsRoutes = require('./routes/newsRoutes');
+const electionRoutes = require('./routes/electionRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/promises', promiseRoutes);
+app.use('/api/ministry-performances', ministryPerformanceRoutes);
+app.use('/api/ministry-growth-news', ministryGrowthNewsRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/elections', electionRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

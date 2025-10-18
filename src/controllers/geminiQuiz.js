@@ -13,7 +13,7 @@ const generateQuiz = async (req, res) => {
     const { language = "English" } = req.body;
 
     const prompt = `
-You are a civic education AI assistant. Create exactly 1 questions in ${language} about
+You are a civic education AI assistant. Create exactly 5 questions in ${language} about
 Sri Lankan political knowledge and leadership understanding.
 Include a mix of:
 - Multiple Choice Questions (MCQ)

@@ -13,10 +13,13 @@ exports.createComment = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Ensure username is not null or undefined - use fullName since that's what exists in DB
+    const username = user.name || 'Anonymous User';
+
     const comment = new UserFeedback({
       promiseId,
       userId,
-      username: user.fullName,
+      username: username, // Use 'name' field from User model
       commentText,
       reactions: [],
       replies: []
@@ -173,9 +176,12 @@ exports.addReply = async (req, res) => {
       return res.status(404).json({ error: 'Comment not found' });
     }
 
+    // Ensure username is not null or undefined - use name since that's what exists in DB
+    const username = user.name || 'Anonymous User';
+
     comment.replies.push({
       userId,
-      username: user.fullName,
+      username: username,
       replyText,
       createdAt: new Date()
     });

@@ -124,7 +124,7 @@ exports.removePromiseReaction = async (req, res) => {
     await promise.save();
     
     // Return updated promise
-    const updatedPromise = await Promise.findById(id).populate('reactions.userId', 'fullName');
+    const updatedPromise = await Promise.findById(id).populate('reactions.userId', 'name');
     
     console.log('Reaction removed successfully');
     res.status(200).json(updatedPromise);

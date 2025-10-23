@@ -21,6 +21,8 @@ const userRoutes = require('./routes/userRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const electionRoutes = require('./routes/electionRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const virtualElectionRoutes = require("./routes/virtualElectionRoutes");
+
 
 const app = express();
 
@@ -47,6 +49,7 @@ app.use('/api/polibot-ai', polibotAiRoutes);
 app.use('/api/quiz', geminiQuizRoutes);
 app.use('/api/quiz/history', quizHistoryRoutes);
 app.use('/api/support', supportRoutes); // Add this line
+app.use("/api/virtualElections", virtualElectionRoutes);
 
 const promiseRoutes = require('./routes/promiseRoutes');
 app.use('/promise/api', promiseRoutes);

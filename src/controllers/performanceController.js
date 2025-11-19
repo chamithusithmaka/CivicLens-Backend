@@ -8,6 +8,7 @@ exports.getPoliticianDashboard = async (req, res) => {
   try {
     const { politicianId } = req.params;
     console.log('[DASHBOARD] Received politicianId:', politicianId);
+    console.log('[DASHBOARD] politicianId type:', typeof politicianId);
 
     // Get politician details with populated references
     const politician = await Politician.findById(politicianId)
@@ -20,9 +21,39 @@ exports.getPoliticianDashboard = async (req, res) => {
       return res.status(404).json({ error: 'Politician not found' });
     }
 
-    // Get all promises for this politician
-    const promises = await PromiseModel.find({ politicianID: politicianId });
-    console.log('[DASHBOARD] Found promises:', promises.length);
+    console.log('[DASHBOARD] Found politician:', politician.name);
+
+    // Debug: Check what politicianIDs exist in Promise collection
+    const allPromises = await PromiseModel.find().limit(5);
+    console.log('[DASHBOARD] Sample promise politicianIDs:', allPromises.map(p => ({ id: p.politicianID, type: typeof p.politicianID })));
+
+    // Try both string and ObjectId versions
+    const promisesAsString = await PromiseModel.find({ politicianID: politicianId.toString() });
+    const promisesAsObjectId = await PromiseModel.find({ politicianID: politicianId });
+    
+    console.log('[DASHBOARD] Promises found with string query:', promisesAsString.length);
+    console.log('[DASHBOARD] Promises found with ObjectId query:', promisesAsObjectId.length);
+
+    // Use whichever query returns results
+    const promises = promisesAsString.length > 0 ? promisesAsString : promisesAsObjectId;
+    console.log('[DASHBOARD] Using promises:', promises.length);
+
+    // If still no promises, check if any promises exist at all for debugging
+    if (promises.length === 0) {
+      const totalPromises = await PromiseModel.countDocuments();
+      console.log('[DASHBOARD] Total promises in database:', totalPromises);
+      
+      // Check if politician._id matches any politicianID in promises
+      const exactMatch = await PromiseModel.findOne({
+        $or: [
+          { politicianID: politicianId },
+          { politicianID: politicianId.toString() },
+          { politicianID: politician._id },
+          { politicianID: politician._id.toString() }
+        ]
+      });
+      console.log('[DASHBOARD] Found exact match:', !!exactMatch);
+    }
 
     // Calculate performance metrics
     const totalPromises = promises.length;
@@ -40,22 +71,22 @@ exports.getPoliticianDashboard = async (req, res) => {
       ? promises.reduce((sum, p) => sum + (p.publicApprovalRating || 0), 0) / promises.length
       : 0;
 
-    // Get quarterly performance data (no hardcoded fallback)
+    // Get quarterly performance data
     const quarterlyData = await getQuarterlyPerformance(politicianId);
     console.log('[DASHBOARD] Quarterly Data:', quarterlyData);
 
-    // Get approval trend data (no hardcoded fallback)
+    // Get approval trend data
     const approvalData = await getApprovalTrend(politicianId);
     console.log('[DASHBOARD] Approval Data:', approvalData);
 
-    // Get category performance data (no hardcoded fallback)
+    // Get category performance data
     const categoryData = await getPerformanceByCategory(politicianId);
     console.log('[DASHBOARD] Category Data:', categoryData);
 
     // Get key promises (top 3 by performance score)
-    const keyPromises = await PromiseModel.find({ politicianID: politicianId })
-      .sort({ performanceScore: -1 })
-      .limit(3);
+    const keyPromises = promises
+      .sort((a, b) => (b.performanceScore || 0) - (a.performanceScore || 0))
+      .slice(0, 3);
 
     // Format key promises for dashboard
     const formattedKeyPromises = keyPromises.map(promise => ({
@@ -66,6 +97,8 @@ exports.getPoliticianDashboard = async (req, res) => {
       fulfillment: promise.promiseFulfillment,
       category: promise.promiseCategory
     }));
+
+    console.log('[DASHBOARD] Final response - totalPromises:', totalPromises);
 
     // Return formatted dashboard data
     res.json({
@@ -141,14 +174,18 @@ exports.getAllPoliticianPerformance = async (req, res) => {
   }
 };
 
-// Get quarterly performance data
+// Get quarterly performance data - FIXED: Convert to string
 async function getQuarterlyPerformance(politicianId) {
-  const promises = await PromiseModel.find({ politicianID: politicianId });
-  // Calculate performance by quarter
+  // Try both string and ObjectId
+  const promisesAsString = await PromiseModel.find({ politicianID: politicianId.toString() });
+  const promisesAsObjectId = await PromiseModel.find({ politicianID: politicianId });
+  const promises = promisesAsString.length > 0 ? promisesAsString : promisesAsObjectId;
+  
   const quarters = ['Q1', 'Q2', 'Q3', 'Q4', 'Now'];
   const quarterlyData = quarters.map(quarter => {
     const quarterPromises = promises.filter(promise => {
       if (quarter === 'Now') return true;
+      if (!promise.startDate) return false;
       const date = new Date(promise.startDate);
       const promiseQuarter = Math.floor((date.getMonth()) / 3) + 1;
       return `Q${promiseQuarter}` === quarter;
@@ -161,9 +198,11 @@ async function getQuarterlyPerformance(politicianId) {
   return quarterlyData;
 }
 
-// Get approval trend data
 async function getApprovalTrend(politicianId) {
-  const promises = await PromiseModel.find({ politicianID: politicianId });
+  const promisesAsString = await PromiseModel.find({ politicianID: politicianId.toString() });
+  const promisesAsObjectId = await PromiseModel.find({ politicianID: politicianId });
+  const promises = promisesAsString.length > 0 ? promisesAsString : promisesAsObjectId;
+  
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
   return months.map((month, index) => {
     const monthPromises = promises.filter((_, i) => i % months.length === index);
@@ -174,10 +213,12 @@ async function getApprovalTrend(politicianId) {
   });
 }
 
-// Get performance by category
 async function getPerformanceByCategory(politicianId) {
-  const promises = await PromiseModel.find({ politicianID: politicianId });
-  const categories = [...new Set(promises.map(p => p.promiseCategory))];
+  const promisesAsString = await PromiseModel.find({ politicianID: politicianId.toString() });
+  const promisesAsObjectId = await PromiseModel.find({ politicianID: politicianId });
+  const promises = promisesAsString.length > 0 ? promisesAsString : promisesAsObjectId;
+  
+  const categories = [...new Set(promises.map(p => p.promiseCategory).filter(Boolean))];
   return categories.map(category => {
     const categoryPromises = promises.filter(p => p.promiseCategory === category);
     const score = categoryPromises.length > 0
@@ -252,7 +293,7 @@ function getStatusLabel(ministry) {
   return 'Needs Improvement';
 }
 
-// Get promise comparison for politicians
+// Get promise comparison for politicians - FIXED: Convert to string
 exports.comparePromisesById = async (req, res) => {
   try {
     const { politicianIds } = req.body; // Array of politician IDs to compare
@@ -270,7 +311,7 @@ exports.comparePromisesById = async (req, res) => {
         return null;
       }
       
-      const promises = await PromiseModel.find({ politicianID: id });
+      const promises = await PromiseModel.find({ politicianID: id.toString() });
       
       return {
         id: politician._id,
